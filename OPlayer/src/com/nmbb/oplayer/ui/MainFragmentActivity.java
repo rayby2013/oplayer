@@ -29,15 +29,15 @@ public class MainFragmentActivity extends FragmentActivity implements OnClickLis
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		if (!io.vov.vitamio.LibsChecker.checkVitamioLibs(this, getClass().getName(), R.string.init_decoders, R.raw.libarm))
+		if (!io.vov.vitamio.LibsChecker.checkVitamioLibs(this, R.string.init_decoders, R.raw.libarm))
 			return;
 
-		OPreference pref = new OPreference(this);
+//		OPreference pref = new OPreference(this);
 		//首次运行，扫描SD卡
-		if (pref.getBoolean(PREF_KEY_FIRST, true)) {
-			getApplicationContext().startService(new Intent(getApplicationContext(), MediaScannerService.class).putExtra(MediaScannerService.EXTRA_DIRECTORY, Environment.getExternalStorageDirectory().getAbsolutePath()));
-			pref.putBooleanAndCommit(PREF_KEY_FIRST, false);
-		}
+//		if (pref.getBoolean(PREF_KEY_FIRST, true)) {
+//			getApplicationContext().startService(new Intent(getApplicationContext(), MediaScannerService.class).putExtra(MediaScannerService.EXTRA_DIRECTORY, Environment.getExternalStorageDirectory().getAbsolutePath()));
+//			pref.putBooleanAndCommit(PREF_KEY_FIRST, false);
+//		}
 
 		setContentView(R.layout.fragment_pager);
 
@@ -87,8 +87,8 @@ public class MainFragmentActivity extends FragmentActivity implements OnClickLis
 				break;
 			case 0:
 			default:
-				result = new FragmentFile();// 本地视频
-				mFileDownload = new FileDownloadHelper(((FragmentFile) result).mDownloadHandler);
+				result = new FragmentFileOld();// 本地视频
+				mFileDownload = new FileDownloadHelper(((FragmentFileOld) result).mDownloadHandler);
 				break;
 			}
 			return result;

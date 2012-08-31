@@ -62,8 +62,8 @@ public final class FileBusiness {
 
 			@Override
 			public int compare(PFile f1, PFile f2) {
-				char c1 = f1.title_pinyin.charAt(0);
-				char c2 = f2.title_pinyin.charAt(0);
+				char c1 = f1.title_pinyin.length() == 0 ? ' ' : f1.title_pinyin.charAt(0);
+				char c2 = f2.title_pinyin.length() == 0 ? ' ' : f2.title_pinyin.charAt(0);
 				return c1 == c2 ? 0 : (c1 > c2 ? 1 : -1);
 			}//相等返回0，-1 f2 > f2，-1
 
