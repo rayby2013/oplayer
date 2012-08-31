@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
+import com.nmbb.oplayer.R;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -35,7 +37,6 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 
-import com.nmbb.oplayer.R;
 
 /**
  * Displays a video file. The VideoView class can load images from various

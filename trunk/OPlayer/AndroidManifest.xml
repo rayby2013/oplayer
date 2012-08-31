@@ -19,6 +19,7 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.GET_TASKS" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:icon="@drawable/icon"
@@ -218,10 +219,13 @@
             android:theme="@android:style/Theme.NoTitleBar"
             android:windowSoftInputMode="stateAlwaysHidden" />
 
+        <!--
         <provider
             android:name="io.vov.vitamio.provider.MediaProvider"
-            android:authorities="me.abitno.vplayer.mediaprovider" />
-
+            android:authorities="me.abitno.vplayer.mediaprovider"
+            android:process="com.yixia.vitamio.mediaprovider" />
+        -->
+        
         <receiver android:name="com.nmbb.oplayer.receiver.MediaScannerReceiver" >
             <intent-filter>
                 <action android:name="com.yixia.vitamio.action.MEDIA_SCANNER_STARTED" />
@@ -252,7 +256,6 @@
                 <action android:name="io.vov.vitamio.IMediaScannerService" />
             </intent-filter>
         </service>
-        
         <service
             android:name="io.vov.vitamio.VitamioService"
             android:exported="false" >

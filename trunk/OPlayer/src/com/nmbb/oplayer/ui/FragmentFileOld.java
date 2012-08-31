@@ -1,8 +1,5 @@
 package com.nmbb.oplayer.ui;
 
-import io.vov.utils.Log;
-import io.vov.vitamio.VIntent;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,17 +8,12 @@ import com.nmbb.oplayer.R;
 import com.nmbb.oplayer.business.FileBusiness;
 import com.nmbb.oplayer.database.SQLiteHelper;
 import com.nmbb.oplayer.po.PFile;
-import com.nmbb.oplayer.receiver.IReceiverNotify;
-import com.nmbb.oplayer.receiver.MediaScannerReceiver;
 import com.nmbb.oplayer.ui.base.ArrayAdapter;
 import com.nmbb.oplayer.ui.helper.FileDownloadHelper;
 import com.nmbb.oplayer.util.FileUtils;
 
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.app.ActivityManager.RunningServiceInfo;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -442,6 +434,8 @@ public class FragmentFileOld extends FragmentBase implements OnItemClickListener
 			super.onPreExecute();
 			pd = new ProgressDialog(getActivity());
 			pd.setMessage("正在扫描视频文件...");
+			pd.setCanceledOnTouchOutside(false);
+			pd.setCancelable(false);
 			pd.show();
 		}
 
@@ -474,9 +468,9 @@ public class FragmentFileOld extends FragmentBase implements OnItemClickListener
 						if (file.isDirectory()) {
 							eachAllMedias(file);
 						} else if (file.exists() && file.canRead() && FileUtils.isVideo(file)) {
-							publishProgress(file);
 							this.files.add(file);
 						}
+						publishProgress(file);
 					}
 				}
 			}

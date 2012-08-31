@@ -55,7 +55,7 @@ public class VideoPlayerActivity extends Activity implements OnCompletionListene
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 
-		if (!io.vov.vitamio.LibsChecker.checkVitamioLibs(this, getClass().getName(), R.string.init_decoders, R.raw.libarm))
+		if (!io.vov.vitamio.LibsChecker.checkVitamioLibs(this, R.string.init_decoders, R.raw.libarm))
 			return;
 
 		Intent intent = getIntent();

@@ -20,7 +20,11 @@ public final class PinyinUtils {
 		StringBuffer result = new StringBuffer();
 		for (char c : chineseStr.toCharArray()) {
 			if (c > 128) {
-				result.append(PinyinHelper.toHanyuPinyinStringArray(c, spellFormat)[0]);
+				String[] array = PinyinHelper.toHanyuPinyinStringArray(c, spellFormat);
+				if (array != null && array.length > 0)
+					result.append(array[0]);
+				else
+					result.append(" ");
 			} else
 				result.append(c);
 		}
