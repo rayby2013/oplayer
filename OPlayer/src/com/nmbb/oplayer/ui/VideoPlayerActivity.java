@@ -5,6 +5,7 @@
 package com.nmbb.oplayer.ui;
 
 import com.nmbb.oplayer.R;
+import com.nmbb.oplayer.ui.vitamio.LibsChecker;
 
 import io.vov.vitamio.MediaPlayer;
 import io.vov.vitamio.MediaPlayer.OnCompletionListener;
@@ -55,7 +56,7 @@ public class VideoPlayerActivity extends Activity implements OnCompletionListene
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 
-		if (!io.vov.vitamio.LibsChecker.checkVitamioLibs(this, R.string.init_decoders, R.raw.libarm))
+		if (!LibsChecker.checkVitamioLibs(this, R.string.init_decoders, R.raw.libarm))
 			return;
 
 		Intent intent = getIntent();
