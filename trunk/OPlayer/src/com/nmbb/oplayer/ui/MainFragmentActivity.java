@@ -5,6 +5,7 @@ import io.vov.vitamio.MediaScannerService;
 import com.nmbb.oplayer.OPreference;
 import com.nmbb.oplayer.R;
 import com.nmbb.oplayer.ui.helper.FileDownloadHelper;
+import com.nmbb.oplayer.ui.vitamio.LibsChecker;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -29,7 +30,7 @@ public class MainFragmentActivity extends FragmentActivity implements OnClickLis
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		if (!io.vov.vitamio.LibsChecker.checkVitamioLibs(this, R.string.init_decoders, R.raw.libarm))
+		if (!LibsChecker.checkVitamioLibs(this, R.string.init_decoders, R.raw.libarm))
 			return;
 
 //		OPreference pref = new OPreference(this);
