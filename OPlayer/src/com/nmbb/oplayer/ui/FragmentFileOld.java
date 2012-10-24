@@ -68,10 +68,10 @@ public class FragmentFileOld extends FragmentBase implements OnItemClickListener
 
 		// ~~~~~~~~~ 加载数据
 		mParent = (MainFragmentActivity) getActivity();
-		if (new SQLiteHelper(getActivity()).isEmpty())
-			new ScanVideoTask().execute();
-		else
-			new DataTask().execute();
+//		if (new SQLiteHelper(getActivity()).isEmpty())
+//			new ScanVideoTask().execute();
+//		else
+//			new DataTask().execute();
 
 		return v;
 	}

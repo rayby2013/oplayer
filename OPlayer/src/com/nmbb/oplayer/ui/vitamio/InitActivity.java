@@ -1,20 +1,23 @@
 package com.nmbb.oplayer.ui.vitamio;
 
 import io.vov.utils.Log;
-import io.vov.vitamio.VitamioConnection;
+import io.vov.vitamio.Vitamio;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import com.nmbb.oplayer.R;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.WindowManager;
-
-import com.yixia.vitamio.library.R;
 
 public class InitActivity extends Activity {
 	public static final String FROM_ME = "fromVitamioInitActivity";
@@ -30,19 +33,36 @@ public class InitActivity extends Activity {
 			protected void onPreExecute() {
 				mPD = new ProgressDialog(InitActivity.this);
 				mPD.setCancelable(false);
-				mPD.setMessage(getString(getIntent().getIntExtra(EXTRA_MSG, R.string.vitamio_init_decoders)));
+				mPD.setMessage(getText(R.string.init_decoders));
 				mPD.show();
 			}
 
 			@Override
 			protected Object doInBackground(Object... params) {
-				VitamioConnection.initNativeLibs(getApplicationContext(), getIntent().getIntExtra(EXTRA_FILE, R.raw.libarm), new VitamioConnection.OnNativeLibsInitedListener() {
-					@Override
-					public void onNativeLibsInitCompleted(String libPath) {
-						Log.d("Native libs inited at " + libPath);
-						uiHandler.sendEmptyMessage(0);
-					}
-				});
+
+				if (Vitamio.isInitialized(getApplicationContext()))
+					return null;
+
+				//反射解压
+				try {
+					Class c = Class.forName("io.vov.vitamio.Vitamio");
+					Method extractLibs = c.getDeclaredMethod("extractLibs", new Class[] { android.content.Context.class, int.class });
+					extractLibs.setAccessible(true);
+					extractLibs.invoke(c, new Object[] { getApplicationContext(), R.raw.libarm });
+				} catch (NoSuchMethodException e) {
+					Log.e("InitActivity", "extractLibs", e);
+					e.printStackTrace();
+				} catch (IllegalArgumentException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					e.printStackTrace();
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				}
+
+				uiHandler.sendEmptyMessage(0);
 				return null;
 			}
 		}.execute();

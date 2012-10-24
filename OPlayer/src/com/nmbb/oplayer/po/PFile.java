@@ -1,6 +1,5 @@
 package com.nmbb.oplayer.po;
 
-import io.vov.vitamio.provider.MediaStore.Video;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -50,6 +49,7 @@ public final class PFile {
 
 	/** 获取缩略图 */
 	public Bitmap getThumb(Context ctx) {
-		return Video.Thumbnails.getThumbnail(ctx.getApplicationContext(), ctx.getContentResolver(), _id, Video.Thumbnails.MICRO_KIND, null);
+		return null;
+//		return Video.Thumbnails.getThumbnail(ctx.getApplicationContext(), ctx.getContentResolver(), _id, Video.Thumbnails.MICRO_KIND, null);
 	}
 }

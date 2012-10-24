@@ -1,6 +1,5 @@
 package com.nmbb.oplayer.ui;
 
-import io.vov.vitamio.MediaScannerService;
 
 import com.nmbb.oplayer.OPreference;
 import com.nmbb.oplayer.R;
@@ -30,7 +29,8 @@ public class MainFragmentActivity extends FragmentActivity implements OnClickLis
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		if (!LibsChecker.checkVitamioLibs(this, R.string.init_decoders, R.raw.libarm))
+//		LibsChecker.checkVitamioLibs(ctx)
+		if (!LibsChecker.checkVitamioLibs(this, R.string.init_decoders))
 			return;
 
 //		OPreference pref = new OPreference(this);

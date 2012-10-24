@@ -2,7 +2,6 @@ package com.nmbb.oplayer.business;
 
 import io.vov.utils.Log;
 import io.vov.vitamio.ThumbnailUtils;
-import io.vov.vitamio.provider.MediaStore.Video;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -139,29 +138,29 @@ public final class FileBusiness {
 			try {
 				if (f.exists() && f.canRead()) {
 					//取出视频的一帧图像
-					Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(ctx, f.getAbsolutePath(), Video.Thumbnails.MINI_KIND);
-					if (bitmap == null) {
-						//缩略图创建失败
-						bitmap = Bitmap.createBitmap(ThumbnailUtils.TARGET_SIZE_MINI_THUMBNAIL_WIDTH, ThumbnailUtils.TARGET_SIZE_MINI_THUMBNAIL_HEIGHT, Bitmap.Config.RGB_565);
-						Log.e(TAG, "batchBuildThumbnail createBitmap faild : " + f.getAbsolutePath());
-					}
-
-					pf.width = bitmap.getWidth();
-					pf.height = bitmap.getHeight();
-
-					//缩略图
-					bitmap = ThumbnailUtils.extractThumbnail(bitmap, ThumbnailUtils.dipToPX(ctx, ThumbnailUtils.TARGET_SIZE_MICRO_THUMBNAIL_WIDTH), ThumbnailUtils.dipToPX(ctx, ThumbnailUtils.TARGET_SIZE_MICRO_THUMBNAIL_HEIGHT), ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
-					if (bitmap != null) {
-						File thum = new File(f.getParent(), f.getName() + ".jpg");
-						pf.thumb = thum.getAbsolutePath();
-						//thum.createNewFile();
-						FileOutputStream iStream = new FileOutputStream(thum);
-						bitmap.compress(Bitmap.CompressFormat.JPEG, 85, iStream);
-						iStream.close();
-					}
-
-					if (bitmap != null)
-						bitmap.recycle();
+//					Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(ctx, f.getAbsolutePath(), Video.Thumbnails.MINI_KIND);
+//					if (bitmap == null) {
+//						//缩略图创建失败
+//						bitmap = Bitmap.createBitmap(ThumbnailUtils.TARGET_SIZE_MINI_THUMBNAIL_WIDTH, ThumbnailUtils.TARGET_SIZE_MINI_THUMBNAIL_HEIGHT, Bitmap.Config.RGB_565);
+//						Log.e(TAG, "batchBuildThumbnail createBitmap faild : " + f.getAbsolutePath());
+//					}
+//
+//					pf.width = bitmap.getWidth();
+//					pf.height = bitmap.getHeight();
+//
+//					//缩略图
+//					bitmap = ThumbnailUtils.extractThumbnail(bitmap, ThumbnailUtils.dipToPX(ctx, ThumbnailUtils.TARGET_SIZE_MICRO_THUMBNAIL_WIDTH), ThumbnailUtils.dipToPX(ctx, ThumbnailUtils.TARGET_SIZE_MICRO_THUMBNAIL_HEIGHT), ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+//					if (bitmap != null) {
+//						File thum = new File(f.getParent(), f.getName() + ".jpg");
+//						pf.thumb = thum.getAbsolutePath();
+//						//thum.createNewFile();
+//						FileOutputStream iStream = new FileOutputStream(thum);
+//						bitmap.compress(Bitmap.CompressFormat.JPEG, 85, iStream);
+//						iStream.close();
+//					}
+//
+//					if (bitmap != null)
+//						bitmap.recycle();
 				}
 			} catch (Exception e) {
 				Log.e(TAG, e);

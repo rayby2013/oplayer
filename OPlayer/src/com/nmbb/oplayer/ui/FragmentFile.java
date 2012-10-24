@@ -1,9 +1,5 @@
 package com.nmbb.oplayer.ui;
 
-import io.vov.vitamio.VIntent;
-import io.vov.vitamio.provider.MediaStore.MediaColumns;
-import io.vov.vitamio.provider.MediaStore.Video;
-
 import java.io.File;
 import java.util.ArrayList;
 import com.nmbb.oplayer.R;
@@ -50,8 +46,8 @@ import android.widget.Toast;
 
 public class FragmentFile extends FragmentBase implements LoaderCallbacks<Cursor>, OnItemClickListener, IReceiverNotify {
 	private static final String TAG = "FragmentFile";
-	private static final String[] PROJECTION_MEDIA = new String[] { Video.Media._ID, Video.Media.TITLE, Video.Media.TITLE_KEY, Video.Media.SIZE, Video.Media.DURATION, Video.Media.DATA, Video.Media.WIDTH, Video.Media.HEIGHT };
-	private static final String ORDER_MEDIA_TITLE = Video.Media.TITLE_KEY + " COLLATE NOCASE ASC";
+//	private static final String[] PROJECTION_MEDIA = new String[] { Video.Media._ID, Video.Media.TITLE, Video.Media.TITLE_KEY, Video.Media.SIZE, Video.Media.DURATION, Video.Media.DATA, Video.Media.WIDTH, Video.Media.HEIGHT };
+//	private static final String ORDER_MEDIA_TITLE = Video.Media.TITLE_KEY + " COLLATE NOCASE ASC";
 
 	private FileAdapter mAdapter;
 	private FileDownloadAdapter mDownloadAdapter;
@@ -70,8 +66,8 @@ public class FragmentFile extends FragmentBase implements LoaderCallbacks<Cursor
 	private static final IntentFilter MEDIA_FILTER = new IntentFilter(Intent.ACTION_MEDIA_MOUNTED);
 	private MediaScannerReceiver mMediaScannerReceiver;
 	static {
-		MEDIA_FILTER.addAction(VIntent.ACTION_MEDIA_SCANNER_STARTED);
-		MEDIA_FILTER.addAction(VIntent.ACTION_MEDIA_SCANNER_FINISHED);
+//		MEDIA_FILTER.addAction(VIntent.ACTION_MEDIA_SCANNER_STARTED);
+//		MEDIA_FILTER.addAction(VIntent.ACTION_MEDIA_SCANNER_FINISHED);
 	}
 	/** 数据更改通知 */
 	private long mNotifyTimestamp = 0;
@@ -171,7 +167,7 @@ public class FragmentFile extends FragmentBase implements LoaderCallbacks<Cursor
 		super.onResume();
 
 		registerReceiver(mMediaScannerReceiver, MEDIA_FILTER);
-		registerContentObserver(Video.Media.CONTENT_URI, true, mDataChangeObserver);
+//		registerContentObserver(Video.Media.CONTENT_URI, true, mDataChangeObserver);
 
 		//检测是否正在扫描
 		if (mParent != null && MediaScannerReceiver.isScanning(mParent)) {
@@ -208,7 +204,8 @@ public class FragmentFile extends FragmentBase implements LoaderCallbacks<Cursor
 	@Override
 	public Loader<Cursor> onCreateLoader(int arg0, Bundle arg1) {
 		Log.e(TAG, "onCreateLoader");
-		return new CursorLoader(mParent, Video.Media.CONTENT_URI, PROJECTION_MEDIA, null, null, ORDER_MEDIA_TITLE);
+//		return new CursorLoader(mParent, Video.Media.CONTENT_URI, PROJECTION_MEDIA, null, null, ORDER_MEDIA_TITLE);
+		return null;
 	}
 
 	@Override
@@ -272,7 +269,7 @@ public class FragmentFile extends FragmentBase implements LoaderCallbacks<Cursor
 						file.delete();
 					}
 					if (f._id > 0) {
-						getActivity().getContentResolver().delete(ContentUris.withAppendedId(Video.Media.CONTENT_URI, f._id), null, null);
+						//getActivity().getContentResolver().delete(ContentUris.withAppendedId(Video.Media.CONTENT_URI, f._id), null, null);
 						refresh();
 					}
 				} catch (Exception e) {
@@ -303,12 +300,12 @@ public class FragmentFile extends FragmentBase implements LoaderCallbacks<Cursor
 					} else if (fromFile.renameTo(nf)) {
 						//更新库
 						if (f._id > 0) {
-							ContentValues values = new ContentValues();
-							values.put(MediaColumns.DATA, nf.getPath());
-							values.put(MediaColumns.TITLE, name);
-							getActivity().getContentResolver().update(ContentUris.withAppendedId(Video.Media.CONTENT_URI, f._id), values, null, null);
-
-							refresh();
+//							ContentValues values = new ContentValues();
+//							values.put(MediaColumns.DATA, nf.getPath());
+//							values.put(MediaColumns.TITLE, name);
+//							getActivity().getContentResolver().update(ContentUris.withAppendedId(Video.Media.CONTENT_URI, f._id), values, null, null);
+//
+//							refresh();
 						}
 					}
 				} catch (SecurityException se) {
@@ -354,7 +351,7 @@ public class FragmentFile extends FragmentBase implements LoaderCallbacks<Cursor
 			case FileDownloadHelper.MESSAGE_STOP://下载结束
 				p = mDownloadAdapter.getItem(url);
 				//通知有新的视频文件
-				getActivity().sendBroadcast(new Intent(VIntent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse(url)));
+//				getActivity().sendBroadcast(new Intent(VIntent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse(url)));
 				break;
 			case FileDownloadHelper.MESSAGE_ERROR:
 				Toast.makeText(getActivity(), url, Toast.LENGTH_LONG).show();

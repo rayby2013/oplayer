@@ -1,6 +1,5 @@
 package com.nmbb.oplayer.receiver;
 
-import io.vov.vitamio.VIntent;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.content.BroadcastReceiver;
@@ -14,7 +13,6 @@ public class MediaScannerReceiver extends BroadcastReceiver {
 	private IReceiverNotify mNotify;
 
 	public MediaScannerReceiver() {
-
 	}
 
 	public MediaScannerReceiver(IReceiverNotify notify) {
@@ -40,17 +38,17 @@ public class MediaScannerReceiver extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
 		final String action = intent.getAction();
 		Log.i("MediaScannerReceiver", action);
-		if (VIntent.ACTION_MEDIA_SCANNER_STARTED.equals(action)) {
-			isScanning = true;
-			//			isScanningStarted = true;
-			if (mNotify != null)
-				mNotify.receiver(0);
-		} else if (VIntent.ACTION_MEDIA_SCANNER_FINISHED.equals(action)) {
-			isScanning = false;
-			if (mNotify != null) {
-				mNotify.receiver(2);
-			}
-		}
+//		if (VIntent.ACTION_MEDIA_SCANNER_STARTED.equals(action)) {
+//			isScanning = true;
+//			//			isScanningStarted = true;
+//			if (mNotify != null)
+//				mNotify.receiver(0);
+//		} else if (VIntent.ACTION_MEDIA_SCANNER_FINISHED.equals(action)) {
+//			isScanning = false;
+//			if (mNotify != null) {
+//				mNotify.receiver(2);
+//			}
+//		}
 	}
 
 	/** 服务是否正在运行 */
