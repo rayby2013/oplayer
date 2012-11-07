@@ -258,7 +258,8 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
 	}
 
 	OnVideoSizeChangedListener mSizeChangedListener = new OnVideoSizeChangedListener() {
-		public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+		@Override
+    public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
 			Log.d("onVideoSizeChanged: (%dx%d)", width, height);
 			mVideoWidth = mp.getVideoWidth();
 			mVideoHeight = mp.getVideoHeight();
@@ -269,7 +270,8 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
 	};
 
 	OnPreparedListener mPreparedListener = new OnPreparedListener() {
-		public void onPrepared(MediaPlayer mp) {
+		@Override
+    public void onPrepared(MediaPlayer mp) {
 			Log.d("onPrepared");
 			mCurrentState = STATE_PREPARED;
 			mTargetState = STATE_PLAYING;
@@ -305,7 +307,8 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
 	};
 
 	private OnCompletionListener mCompletionListener = new OnCompletionListener() {
-		public void onCompletion(MediaPlayer mp) {
+		@Override
+    public void onCompletion(MediaPlayer mp) {
 			Log.d("onCompletion");
 			mCurrentState = STATE_PLAYBACK_COMPLETED;
 			mTargetState = STATE_PLAYBACK_COMPLETED;
@@ -317,7 +320,8 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
 	};
 
 	private OnErrorListener mErrorListener = new OnErrorListener() {
-		public boolean onError(MediaPlayer mp, int framework_err, int impl_err) {
+		@Override
+    public boolean onError(MediaPlayer mp, int framework_err, int impl_err) {
 			Log.d("Error: %d, %d", framework_err, impl_err);
 			mCurrentState = STATE_ERROR;
 			mTargetState = STATE_ERROR;
@@ -333,7 +337,8 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
 				int message = framework_err == MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK ? R.string.VideoView_error_text_invalid_progressive_playback : R.string.VideoView_error_text_unknown;
 
 				new AlertDialog.Builder(mContext).setTitle(R.string.VideoView_error_title).setMessage(message).setPositiveButton(R.string.VideoView_error_button, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
+					@Override
+          public void onClick(DialogInterface dialog, int whichButton) {
 						if (mOnCompletionListener != null)
 							mOnCompletionListener.onCompletion(mMediaPlayer);
 					}
@@ -344,7 +349,8 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
 	};
 
 	private OnBufferingUpdateListener mBufferingUpdateListener = new OnBufferingUpdateListener() {
-		public void onBufferingUpdate(MediaPlayer mp, int percent) {
+		@Override
+    public void onBufferingUpdate(MediaPlayer mp, int percent) {
 			mCurrentBufferPercentage = percent;
 			if (mOnBufferingUpdateListener != null)
 				mOnBufferingUpdateListener.onBufferingUpdate(mp, percent);
@@ -422,7 +428,8 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
 	}
 
 	SurfaceHolder.Callback mSHCallback = new SurfaceHolder.Callback() {
-		public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+		@Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
 			mSurfaceWidth = w;
 			mSurfaceHeight = h;
 			boolean isValidState = (mTargetState == STATE_PLAYING);
@@ -439,7 +446,8 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
 			}
 		}
 
-		public void surfaceCreated(SurfaceHolder holder) {
+		@Override
+    public void surfaceCreated(SurfaceHolder holder) {
 			mSurfaceHolder = holder;
 			if (mMediaPlayer != null && mCurrentState == STATE_SUSPEND && mTargetState == STATE_RESUME) {
 				mMediaPlayer.setDisplay(mSurfaceHolder);
@@ -449,7 +457,8 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
 			}
 		}
 
-		public void surfaceDestroyed(SurfaceHolder holder) {
+		@Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
 			mSurfaceHolder = null;
 			if (mMediaController != null)
 				mMediaController.hide();
@@ -515,7 +524,8 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
 		}
 	}
 
-	public void start() {
+	@Override
+  public void start() {
 		if (isInPlaybackState()) {
 			mMediaPlayer.start();
 			mCurrentState = STATE_PLAYING;
@@ -523,7 +533,8 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
 		mTargetState = STATE_PLAYING;
 	}
 
-	public void pause() {
+	@Override
+  public void pause() {
 		if (isInPlaybackState()) {
 			if (mMediaPlayer.isPlaying()) {
 				mMediaPlayer.pause();
@@ -549,7 +560,8 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
 		}
 	}
 
-	public long getDuration() {
+	@Override
+  public long getDuration() {
 		if (isInPlaybackState()) {
 			if (mDuration > 0)
 				return mDuration;
@@ -560,13 +572,15 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
 		return mDuration;
 	}
 
-	public long getCurrentPosition() {
+	@Override
+  public long getCurrentPosition() {
 		if (isInPlaybackState())
 			return mMediaPlayer.getCurrentPosition();
 		return 0;
 	}
 
-	public void seekTo(long msec) {
+	@Override
+  public void seekTo(long msec) {
 		if (isInPlaybackState()) {
 			mMediaPlayer.seekTo(msec);
 			mSeekWhenPrepared = 0;
@@ -575,11 +589,13 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
 		}
 	}
 
-	public boolean isPlaying() {
+	@Override
+  public boolean isPlaying() {
 		return isInPlaybackState() && mMediaPlayer.isPlaying();
 	}
 
-	public int getBufferPercentage() {
+	@Override
+  public int getBufferPercentage() {
 		if (mMediaPlayer != null)
 			return mCurrentBufferPercentage;
 		return 0;
@@ -694,15 +710,18 @@ public class VideoView extends SurfaceView implements MediaController.MediaPlaye
 		return (mMediaPlayer != null && mCurrentState != STATE_ERROR && mCurrentState != STATE_IDLE && mCurrentState != STATE_PREPARING);
 	}
 
-	public boolean canPause() {
+	@Override
+  public boolean canPause() {
 		return mCanPause;
 	}
 
-	public boolean canSeekBackward() {
+	@Override
+  public boolean canSeekBackward() {
 		return mCanSeekBack;
 	}
 
-	public boolean canSeekForward() {
+	@Override
+  public boolean canSeekForward() {
 		return mCanSeekForward;
 	}
 }

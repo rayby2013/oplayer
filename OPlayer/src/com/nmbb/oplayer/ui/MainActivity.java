@@ -1,11 +1,6 @@
 package com.nmbb.oplayer.ui;
 
 
-import com.nmbb.oplayer.OPreference;
-import com.nmbb.oplayer.R;
-import com.nmbb.oplayer.ui.helper.FileDownloadHelper;
-import com.nmbb.oplayer.ui.vitamio.LibsChecker;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
@@ -17,9 +12,17 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.RadioButton;
 
-public class MainFragmentActivity extends FragmentActivity implements OnClickListener {
+import com.nmbb.oplayer.OPlayerApplication;
+import com.nmbb.oplayer.OPreference;
+import com.nmbb.oplayer.R;
+import com.nmbb.oplayer.service.MediaScannerService;
+import com.nmbb.oplayer.ui.helper.FileDownloadHelper;
+import com.nmbb.oplayer.ui.vitamio.InitActivity;
+import com.nmbb.oplayer.ui.vitamio.LibsChecker;
 
-	private static final String PREF_KEY_FIRST = "application_first";
+public class MainActivity extends FragmentActivity implements OnClickListener {
+
+	
 	private ViewPager mPager;
 	private RadioButton mRadioFile;
 	private RadioButton mRadioOnline;
@@ -33,12 +36,11 @@ public class MainFragmentActivity extends FragmentActivity implements OnClickLis
 		if (!LibsChecker.checkVitamioLibs(this, R.string.init_decoders))
 			return;
 
-//		OPreference pref = new OPreference(this);
-		//首次运行，扫描SD卡
-//		if (pref.getBoolean(PREF_KEY_FIRST, true)) {
-//			getApplicationContext().startService(new Intent(getApplicationContext(), MediaScannerService.class).putExtra(MediaScannerService.EXTRA_DIRECTORY, Environment.getExternalStorageDirectory().getAbsolutePath()));
-//			pref.putBooleanAndCommit(PREF_KEY_FIRST, false);
-//		}
+		OPreference pref = new OPreference(this);
+		//	首次运行，扫描SD卡
+		if (pref.getBoolean(OPlayerApplication.PREF_KEY_FIRST, true)) {
+			getApplicationContext().startService(new Intent(getApplicationContext(), MediaScannerService.class).putExtra(MediaScannerService.EXTRA_DIRECTORY, Environment.getExternalStorageDirectory().getAbsolutePath()));
+		}
 
 		setContentView(R.layout.fragment_pager);
 

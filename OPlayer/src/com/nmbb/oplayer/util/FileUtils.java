@@ -2,10 +2,13 @@ package com.nmbb.oplayer.util;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import android.os.Environment;
 import android.os.StatFs;
+import android.util.Log;
 
 public class FileUtils {
 	// http://www.fileinfo.com/filetypes/video , "dat" , "bin" , "rms"
@@ -109,5 +112,78 @@ public class FileUtils {
 			return showFileSize(availCount * blockSize) + " / " + showFileSize(blockSize * blockCount);
 		}
 		return result;
+	}
+
+	/** 如果不存在就创建 */
+	public static boolean createIfNoExists(String path) {
+		File file = new File(path);
+		boolean mk = false;
+		if (!file.exists()) {
+			mk = file.mkdirs();
+		}
+		return mk;
+	}
+
+	private static HashMap<String, String> mMimeType = new HashMap<String, String>();
+	static {
+		mMimeType.put("M1V", "video/mpeg");
+		mMimeType.put("MP2", "video/mpeg");
+		mMimeType.put("MPE", "video/mpeg");
+		mMimeType.put("MPG", "video/mpeg");
+		mMimeType.put("MPEG", "video/mpeg");
+		mMimeType.put("MP4", "video/mp4");
+		mMimeType.put("M4V", "video/mp4");
+		mMimeType.put("3GP", "video/3gpp");
+		mMimeType.put("3GPP", "video/3gpp");
+		mMimeType.put("3G2", "video/3gpp2");
+		mMimeType.put("3GPP2", "video/3gpp2");
+		mMimeType.put("MKV", "video/x-matroska");
+		mMimeType.put("WEBM", "video/x-matroska");
+		mMimeType.put("MTS", "video/mp2ts");
+		mMimeType.put("TS", "video/mp2ts");
+		mMimeType.put("TP", "video/mp2ts");
+		mMimeType.put("WMV", "video/x-ms-wmv");
+		mMimeType.put("ASF", "video/x-ms-asf");
+		mMimeType.put("ASX", "video/x-ms-asf");
+		mMimeType.put("FLV", "video/x-flv");
+		mMimeType.put("MOV", "video/quicktime");
+		mMimeType.put("QT", "video/quicktime");
+		mMimeType.put("RM", "video/x-pn-realvideo");
+		mMimeType.put("RMVB", "video/x-pn-realvideo");
+		mMimeType.put("VOB", "video/dvd");
+		mMimeType.put("DAT", "video/dvd");
+		mMimeType.put("AVI", "video/x-divx");
+		mMimeType.put("OGV", "video/ogg");
+		mMimeType.put("OGG", "video/ogg");
+		mMimeType.put("VIV", "video/vnd.vivo");
+		mMimeType.put("VIVO", "video/vnd.vivo");
+		mMimeType.put("WTV", "video/wtv");
+		mMimeType.put("AVS", "video/avs-video");
+		mMimeType.put("SWF", "video/x-shockwave-flash");
+		mMimeType.put("YUV", "video/x-raw-yuv");
+	}
+
+	/** 获取MIME */
+	public static String getMimeType(String path) {
+		int lastDot = path.lastIndexOf(".");
+		if (lastDot < 0)
+			return null;
+
+		return mMimeType.get(path.substring(lastDot + 1).toUpperCase());
+	}
+
+	/** 多个SD卡时 取外置SD卡 */
+	public static String getExternalStorageDirectory() {
+		//参考文章
+		//http://blog.csdn.net/bbmiku/article/details/7937745
+		Map<String, String> map = System.getenv();
+		String[] values = new String[map.values().size()];
+		map.values().toArray(values);
+		String path = values[values.length - 1];
+		Log.e("nmbb", "FileUtils.getExternalStorageDirectory : " + path);
+		if (path.startsWith("/mnt/") && !Environment.getExternalStorageDirectory().getAbsolutePath().equals(path))
+			return path;
+		else
+			return null;
 	}
 }

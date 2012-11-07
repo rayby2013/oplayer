@@ -3,42 +3,48 @@ package com.nmbb.oplayer.ui;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import com.nmbb.oplayer.R;
-import com.nmbb.oplayer.business.FileBusiness;
-import com.nmbb.oplayer.database.SQLiteHelper;
-import com.nmbb.oplayer.po.PFile;
-import com.nmbb.oplayer.ui.base.ArrayAdapter;
-import com.nmbb.oplayer.ui.helper.FileDownloadHelper;
-import com.nmbb.oplayer.util.FileUtils;
+import java.util.List;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class FragmentFileOld extends FragmentBase implements OnItemClickListener {
+import com.nmbb.oplayer.R;
+import com.nmbb.oplayer.business.FileBusiness;
+import com.nmbb.oplayer.database.DbHelper;
+import com.nmbb.oplayer.exception.Logger;
+import com.nmbb.oplayer.po.POMedia;
+import com.nmbb.oplayer.service.MediaScannerService;
+import com.nmbb.oplayer.service.MediaScannerService.IMediaScannerObserver;
+import com.nmbb.oplayer.service.MediaScannerService.MediaScannerServiceBinder;
+import com.nmbb.oplayer.ui.base.ArrayAdapter;
+import com.nmbb.oplayer.ui.helper.FileDownloadHelper;
+import com.nmbb.oplayer.util.FileUtils;
+
+public class FragmentFileOld extends FragmentBase implements OnItemClickListener, IMediaScannerObserver {
 
 	private FileAdapter mAdapter;
 	private FileAdapter mDownloadAdapter;
@@ -46,8 +52,27 @@ public class FragmentFileOld extends FragmentBase implements OnItemClickListener
 	private ImageView alphabet_scroller;
 	/** 临时列表 */
 	private ListView mTempListView;
-	private MainFragmentActivity mParent;
+	private MainActivity mParent;
 	private TextView mSDAvailable;
+	/** 左下角进度显示 */
+	private View mProgress;
+
+	private MediaScannerService mMediaScannerService;
+
+	private ServiceConnection mMediaScannerServiceConnection = new ServiceConnection() {
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			mMediaScannerService = null;
+		}
+
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			mMediaScannerService = ((MediaScannerServiceBinder) service).getService();
+			mMediaScannerService.addObserver(FragmentFileOld.this);
+			//			Toast.makeText(ComponentServiceActivity.this, "Service绑定成功!", Toast.LENGTH_SHORT).show();
+		}
+	};
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -57,6 +82,7 @@ public class FragmentFileOld extends FragmentBase implements OnItemClickListener
 		alphabet_scroller = (ImageView) v.findViewById(R.id.alphabet_scroller);
 		mTempListView = (ListView) v.findViewById(R.id.templist);
 		mSDAvailable = (TextView) v.findViewById(R.id.sd_block);
+		mProgress = v.findViewById(android.R.id.progress);
 
 		// ~~~~~~~~~ 绑定事件
 		alphabet_scroller.setClickable(true);
@@ -67,13 +93,51 @@ public class FragmentFileOld extends FragmentBase implements OnItemClickListener
 		mTempListView.setOnCreateContextMenuListener(OnTempListViewMenu);
 
 		// ~~~~~~~~~ 加载数据
-		mParent = (MainFragmentActivity) getActivity();
-		if (new SQLiteHelper(getActivity()).isEmpty())
-			new ScanVideoTask().execute();
-		else
-			new DataTask().execute();
+		mParent = (MainActivity) getActivity();
+		//		if (new SQLiteHelper(getActivity()).isEmpty())
+		//			new ScanVideoTask().execute();
+		//		else
+		new DataTask().execute();
 
+		getActivity().bindService(new Intent(getActivity().getApplicationContext(), MediaScannerService.class), mMediaScannerServiceConnection, Context.BIND_AUTO_CREATE);
 		return v;
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+	}
+
+	@Override
+	public void onDestroy() {
+		getActivity().unbindService(mMediaScannerServiceConnection);
+		super.onDestroy();
+	}
+
+	/**
+	 * 
+	 * @param flag 0 开始扫描 1 正在扫描 2 扫描完成
+	 * @param file 扫描到的视频文件
+	 */
+	@Override
+	public void update(int flag, POMedia media) {
+		//		Logger.i(flag + " " + media.path);
+		switch (flag) {
+		case MediaScannerService.SCAN_STATUS_START:
+
+			break;
+		case MediaScannerService.SCAN_STATUS_END://扫描完成
+			if (mProgress != null)
+				mProgress.setVisibility(View.GONE);
+			new DataTask().execute();
+			break;
+		case MediaScannerService.SCAN_STATUS_RUNNING://扫到一个文件
+			if (mAdapter != null && media != null) {
+				mAdapter.add(media);
+				mAdapter.notifyDataSetChanged();
+			}
+			break;
+		}
 	}
 
 	@Override
@@ -82,6 +146,11 @@ public class FragmentFileOld extends FragmentBase implements OnItemClickListener
 
 		//SD卡剩余数量
 		mSDAvailable.setText(FileUtils.showFileAvailable());
+
+		if (MediaScannerService.isRunning())
+			mProgress.setVisibility(View.VISIBLE);
+		else
+			mProgress.setVisibility(View.GONE);
 	}
 
 	ListView.OnCreateContextMenuListener OnListViewMenu = new ListView.OnCreateContextMenuListener() {
@@ -126,7 +195,7 @@ public class FragmentFileOld extends FragmentBase implements OnItemClickListener
 	};
 
 	/** 删除文件 */
-	private void deleteFile(final FileAdapter adapter, final PFile f, final int position) {
+	private void deleteFile(final FileAdapter adapter, final POMedia f, final int position) {
 		new AlertDialog.Builder(getActivity()).setIcon(android.R.drawable.ic_dialog_alert).setTitle(R.string.file_delete).setMessage(getString(R.string.file_delete_confirm, f.title)).setNegativeButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -134,7 +203,9 @@ public class FragmentFileOld extends FragmentBase implements OnItemClickListener
 					File file = new File(f.path);
 					if (file.canRead() && file.exists())
 						file.delete();
-					FileBusiness.deleteFile(getActivity(), f);
+
+					//					FileBusiness.deleteFile(getActivity(), f);
+					new DbHelper<POMedia>().remove(f);
 					adapter.delete(position);
 				} catch (Exception e) {
 
@@ -145,7 +216,7 @@ public class FragmentFileOld extends FragmentBase implements OnItemClickListener
 	}
 
 	/** 重命名文件 */
-	private void renameFile(final FileAdapter adapter, final PFile f, final int position) {
+	private void renameFile(final FileAdapter adapter, final POMedia f, final int position) {
 		final EditText et = new EditText(getActivity());
 		et.setText(f.title);
 		new AlertDialog.Builder(getActivity()).setTitle(R.string.file_rename).setIcon(android.R.drawable.ic_dialog_info).setView(et).setNegativeButton(android.R.string.yes, new DialogInterface.OnClickListener() {
@@ -164,7 +235,9 @@ public class FragmentFileOld extends FragmentBase implements OnItemClickListener
 					} else if (fromFile.renameTo(nf)) {
 						f.title = name;
 						f.path = nf.getPath();
-						FileBusiness.renameFile(getActivity(), f);
+						//						FileBusiness.renameFile(getActivity(), f);
+
+						new DbHelper<POMedia>().update(f);
 						adapter.notifyDataSetChanged();
 					}
 				} catch (SecurityException se) {
@@ -178,17 +251,17 @@ public class FragmentFileOld extends FragmentBase implements OnItemClickListener
 	public Handler mDownloadHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-			PFile p;
+			POMedia p;
 			String url = msg.obj.toString();
 			switch (msg.what) {
 			case FileDownloadHelper.MESSAGE_START://开始下载
-				p = new PFile();
+				p = new POMedia();
 				p.path = mParent.mFileDownload.mDownloadUrls.get(url);
 				p.title = new File(p.path).getName();
 				p.status = 0;
 				p.file_size = 0;
 				if (mDownloadAdapter == null) {
-					mDownloadAdapter = new FileAdapter(getActivity(), new ArrayList<PFile>());
+					mDownloadAdapter = new FileAdapter(getActivity(), new ArrayList<POMedia>());
 					mDownloadAdapter.add(p, url);
 					mTempListView.setAdapter(mDownloadAdapter);
 					mTempListView.setVisibility(View.VISIBLE);
@@ -209,7 +282,8 @@ public class FragmentFileOld extends FragmentBase implements OnItemClickListener
 				break;
 			case FileDownloadHelper.MESSAGE_STOP://下载结束
 				p = mDownloadAdapter.getItem(url);
-				FileBusiness.insertFile(getActivity(), p);
+				new DbHelper<POMedia>().create(p);
+				//				FileBusiness.insertFile(getActivity(), p);
 				break;
 			case FileDownloadHelper.MESSAGE_ERROR:
 				Toast.makeText(getActivity(), url, Toast.LENGTH_LONG).show();
@@ -222,14 +296,14 @@ public class FragmentFileOld extends FragmentBase implements OnItemClickListener
 	/** 单击启动播放 */
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		final PFile f = parent == mListView ? mAdapter.getItem(position) : mDownloadAdapter.getItem(position);
+		final POMedia f = parent == mListView ? mAdapter.getItem(position) : mDownloadAdapter.getItem(position);
 		Intent intent = new Intent(getActivity(), VideoPlayerActivity.class);
 		intent.putExtra("path", f.path);
 		intent.putExtra("title", f.title);
 		startActivity(intent);
 	}
 
-	private class DataTask extends AsyncTask<Void, Void, ArrayList<PFile>> {
+	private class DataTask extends AsyncTask<Void, Void, List<POMedia>> {
 
 		@Override
 		protected void onPreExecute() {
@@ -239,15 +313,15 @@ public class FragmentFileOld extends FragmentBase implements OnItemClickListener
 		}
 
 		@Override
-		protected ArrayList<PFile> doInBackground(Void... params) {
-			return FileBusiness.getAllSortFiles(getActivity());
+		protected List<POMedia> doInBackground(Void... params) {
+			return FileBusiness.getAllSortFiles();
 		}
 
 		@Override
-		protected void onPostExecute(ArrayList<PFile> result) {
+		protected void onPostExecute(List<POMedia> result) {
 			super.onPostExecute(result);
 
-			mAdapter = new FileAdapter(getActivity(), FileBusiness.getAllSortFiles(getActivity()));
+			mAdapter = new FileAdapter(getActivity(), result);
 			mListView.setAdapter(mAdapter);
 
 			mLoadingLayout.setVisibility(View.GONE);
@@ -255,18 +329,18 @@ public class FragmentFileOld extends FragmentBase implements OnItemClickListener
 		}
 	}
 
-	private class FileAdapter extends ArrayAdapter<PFile> {
+	private class FileAdapter extends ArrayAdapter<POMedia> {
 
-		private HashMap<String, PFile> maps = new HashMap<String, PFile>();
+		private HashMap<String, POMedia> maps = new HashMap<String, POMedia>();
 
-		public FileAdapter(Context ctx, ArrayList<PFile> l) {
+		public FileAdapter(Context ctx, List<POMedia> l) {
 			super(ctx, l);
 			maps.clear();
 		}
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-			final PFile f = getItem(position);
+			final POMedia f = getItem(position);
 			if (convertView == null) {
 				final LayoutInflater mInflater = getActivity().getLayoutInflater();
 				convertView = mInflater.inflate(R.layout.fragment_file_item, null);
@@ -298,7 +372,7 @@ public class FragmentFileOld extends FragmentBase implements OnItemClickListener
 			return convertView;
 		}
 
-		public void add(PFile item, String url) {
+		public void add(POMedia item, String url) {
 			super.add(item);
 			if (!maps.containsKey(url))
 				maps.put(url, item);
@@ -311,7 +385,7 @@ public class FragmentFileOld extends FragmentBase implements OnItemClickListener
 			notifyDataSetChanged();
 		}
 
-		public PFile getItem(String url) {
+		public POMedia getItem(String url) {
 			return maps.get(url);
 		}
 	}
@@ -411,8 +485,8 @@ public class FragmentFileOld extends FragmentBase implements OnItemClickListener
 			mListView.setSelection(mAdapter.getCount() - 1);
 		else {
 			if (mAdapter != null && mAdapter.getAll() != null) {
-				for (PFile item : mAdapter.getAll()) {
-					if (item.title_pinyin.startsWith(key)) {
+				for (POMedia item : mAdapter.getAll()) {
+					if (item.title_key.startsWith(key)) {
 						mListView.setSelection(position);
 						break;
 					}
@@ -424,64 +498,64 @@ public class FragmentFileOld extends FragmentBase implements OnItemClickListener
 
 	// ~~~~~~~~~~~~~~ 后续弃用，直接使用Vitamio提供的
 
-	/** 扫描SD卡 */
-	private class ScanVideoTask extends AsyncTask<Void, File, ArrayList<PFile>> {
-		private ProgressDialog pd;
-		private ArrayList<File> files = new ArrayList<File>();
-
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-			pd = new ProgressDialog(getActivity());
-			pd.setMessage("正在扫描视频文件...");
-			pd.setCanceledOnTouchOutside(false);
-			pd.setCancelable(false);
-			pd.show();
-		}
-
-		@Override
-		protected ArrayList<PFile> doInBackground(Void... params) {
-			// ~~~ 遍历文件夹
-			eachAllMedias(Environment.getExternalStorageDirectory());
-
-			// ~~~ 提取缩略图、视频尺寸等。
-			FileBusiness.batchBuildThumbnail(getActivity(), files);
-
-			// ~~~ 入库
-			FileBusiness.batchInsertFiles(getActivity(), files);
-
-			// ~~~ 查询数据
-			return FileBusiness.getAllSortFiles(getActivity());
-		}
-
-		@Override
-		protected void onProgressUpdate(final File... values) {
-			pd.setMessage(values[0].getName());
-		}
-
-		/** 遍历所有文件夹，查找出视频文件 */
-		public void eachAllMedias(File f) {
-			if (f != null && f.exists() && f.isDirectory()) {
-				File[] files = f.listFiles();
-				if (files != null) {
-					for (File file : f.listFiles()) {
-						if (file.isDirectory()) {
-							eachAllMedias(file);
-						} else if (file.exists() && file.canRead() && FileUtils.isVideo(file)) {
-							this.files.add(file);
-						}
-						publishProgress(file);
-					}
-				}
-			}
-		}
-
-		@Override
-		protected void onPostExecute(ArrayList<PFile> result) {
-			super.onPostExecute(result);
-			mAdapter = new FileAdapter(getActivity(), result);
-			mListView.setAdapter(mAdapter);
-			pd.dismiss();
-		}
-	}
+	//	/** 扫描SD卡 */
+	//	private class ScanVideoTask extends AsyncTask<Void, File, ArrayList<PFile>> {
+	//		private ProgressDialog pd;
+	//		private ArrayList<File> files = new ArrayList<File>();
+	//
+	//		@Override
+	//		protected void onPreExecute() {
+	//			super.onPreExecute();
+	//			pd = new ProgressDialog(getActivity());
+	//			pd.setMessage("正在扫描视频文件...");
+	//			pd.setCanceledOnTouchOutside(false);
+	//			pd.setCancelable(false);
+	//			pd.show();
+	//		}
+	//
+	//		@Override
+	//		protected ArrayList<PFile> doInBackground(Void... params) {
+	//			// ~~~ 遍历文件夹
+	//			eachAllMedias(Environment.getExternalStorageDirectory());
+	//
+	//			// ~~~ 提取缩略图、视频尺寸等。
+	//			FileBusiness.batchBuildThumbnail(getActivity(), files);
+	//
+	//			// ~~~ 入库
+	//			FileBusiness.batchInsertFiles(getActivity(), files);
+	//
+	//			// ~~~ 查询数据
+	//			return FileBusiness.getAllSortFiles(getActivity());
+	//		}
+	//
+	//		@Override
+	//		protected void onProgressUpdate(final File... values) {
+	//			pd.setMessage(values[0].getName());
+	//		}
+	//
+	//		/** 遍历所有文件夹，查找出视频文件 */
+	//		public void eachAllMedias(File f) {
+	//			if (f != null && f.exists() && f.isDirectory()) {
+	//				File[] files = f.listFiles();
+	//				if (files != null) {
+	//					for (File file : f.listFiles()) {
+	//						if (file.isDirectory()) {
+	//							eachAllMedias(file);
+	//						} else if (file.exists() && file.canRead() && FileUtils.isVideo(file)) {
+	//							this.files.add(file);
+	//						}
+	//						publishProgress(file);
+	//					}
+	//				}
+	//			}
+	//		}
+	//
+	//		@Override
+	//		protected void onPostExecute(ArrayList<PFile> result) {
+	//			super.onPostExecute(result);
+	//			mAdapter = new FileAdapter(getActivity(), result);
+	//			mListView.setAdapter(mAdapter);
+	//			pd.dismiss();
+	//		}
+	//	}
 }

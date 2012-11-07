@@ -3,21 +3,23 @@ package com.nmbb.oplayer.ui.vitamio;
 import io.vov.utils.Log;
 import io.vov.vitamio.Vitamio;
 
-import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import com.nmbb.oplayer.R;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.view.WindowManager;
+
+import com.nmbb.oplayer.OPlayerApplication;
+import com.nmbb.oplayer.OPreference;
+import com.nmbb.oplayer.R;
+import com.nmbb.oplayer.service.MediaScannerService;
 
 public class InitActivity extends Activity {
 	public static final String FROM_ME = "fromVitamioInitActivity";
@@ -25,11 +27,13 @@ public class InitActivity extends Activity {
 	public static final String EXTRA_FILE = "EXTRA_FILE";
 	private ProgressDialog mPD;
 
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		new AsyncTask<Object, Object, Object>() {
+			@Override
 			protected void onPreExecute() {
 				mPD = new ProgressDialog(InitActivity.this);
 				mPD.setCancelable(false);
@@ -40,27 +44,33 @@ public class InitActivity extends Activity {
 			@Override
 			protected Object doInBackground(Object... params) {
 
-				if (Vitamio.isInitialized(getApplicationContext()))
-					return null;
-
-				//反射解压
-				try {
-					Class c = Class.forName("io.vov.vitamio.Vitamio");
-					Method extractLibs = c.getDeclaredMethod("extractLibs", new Class[] { android.content.Context.class, int.class });
-					extractLibs.setAccessible(true);
-					extractLibs.invoke(c, new Object[] { getApplicationContext(), R.raw.libarm });
-				} catch (NoSuchMethodException e) {
-					Log.e("InitActivity", "extractLibs", e);
-					e.printStackTrace();
-				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (InvocationTargetException e) {
-					e.printStackTrace();
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				}
+				Vitamio.initialize(getApplicationContext());
+//				if (Vitamio.isInitialized(getApplicationContext()))
+//					return null;
+//
+//				//反射解压
+//				try {
+//					Class c = Class.forName("io.vov.vitamio.Vitamio");
+//					Method extractLibs = c.getDeclaredMethod("extractLibs", new Class[] { android.content.Context.class, int.class });
+//					extractLibs.setAccessible(true);
+//					extractLibs.invoke(c, new Object[] { getApplicationContext(), R.raw.libarm });
+//					
+////					Field vitamioLibraryPath = c.getDeclaredField("vitamioLibraryPath");
+////
+////					 AndroidContextUtils.getDataDir(ctx) + "libs/"
+//					
+//				} catch (NoSuchMethodException e) {
+//					Log.e("extractLibs", e);
+//					e.printStackTrace();
+//				} catch (IllegalArgumentException e) {
+//					e.printStackTrace();
+//				} catch (IllegalAccessException e) {
+//					e.printStackTrace();
+//				} catch (InvocationTargetException e) {
+//					e.printStackTrace();
+//				} catch (ClassNotFoundException e) {
+//					e.printStackTrace();
+//				}
 
 				uiHandler.sendEmptyMessage(0);
 				return null;
@@ -69,6 +79,7 @@ public class InitActivity extends Activity {
 	}
 
 	private Handler uiHandler = new Handler() {
+		@Override
 		public void handleMessage(Message msg) {
 			mPD.dismiss();
 			Intent src = getIntent();
@@ -78,6 +89,7 @@ public class InitActivity extends Activity {
 			i.putExtras(src);
 			i.putExtra(FROM_ME, true);
 			startActivity(i);
+
 			finish();
 		}
 	};

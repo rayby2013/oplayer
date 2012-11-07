@@ -1,7 +1,9 @@
 package com.nmbb.oplayer.ui.base;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -16,8 +18,27 @@ public abstract class ArrayAdapter<T> extends BaseAdapter {
 
 	public ArrayAdapter(final Context ctx, final ArrayList<T> l) {
 		mObjects = l == null ? new ArrayList<T>() : l;
-		mInflater = (LayoutInflater) ctx
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		mInflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	}
+
+	public ArrayAdapter(final Context ctx, final T... l) {
+		mObjects = new ArrayList<T>();
+		mObjects.addAll(Arrays.asList(l));
+		mInflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	}
+
+	public ArrayAdapter(final Context ctx, final List<T> l) {
+		mObjects = new ArrayList<T>();
+		if (l != null)
+			mObjects.addAll(l);
+		mInflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	}
+
+	public ArrayAdapter(final Context ctx, final Collection<T> l) {
+		mObjects = new ArrayList<T>();
+		if (l != null)
+			mObjects.addAll(l);
+		mInflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
 	@Override
@@ -48,8 +69,7 @@ public abstract class ArrayAdapter<T> extends BaseAdapter {
 	/**
 	 * Adds the specified items at the end of the array.
 	 * 
-	 * @param items
-	 *            The items to add at the end of the array.
+	 * @param items The items to add at the end of the array.
 	 */
 	public void addAll(T... items) {
 		ArrayList<T> values = this.mObjects;
