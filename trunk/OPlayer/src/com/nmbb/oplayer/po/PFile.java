@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 
 public final class PFile {
+	
 	public long _id;
 	/** 视频标题 */
 	public String title;

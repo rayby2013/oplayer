@@ -126,8 +126,8 @@ public class MediaController extends FrameLayout {
 			removeAllViews();
 			mRoot = makeControllerView();
 			mWindow.setContentView(mRoot);
-			mWindow.setWidth(LayoutParams.MATCH_PARENT);
-			mWindow.setHeight(LayoutParams.WRAP_CONTENT);
+			mWindow.setWidth(android.view.ViewGroup.LayoutParams.MATCH_PARENT);
+			mWindow.setHeight(android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 		}
 		initControllerView(mRoot);
 	}
@@ -395,7 +395,8 @@ public class MediaController extends FrameLayout {
 	}
 
 	private View.OnClickListener mPauseListener = new View.OnClickListener() {
-		public void onClick(View v) {
+		@Override
+    public void onClick(View v) {
 			doPauseResume();
 			show(sDefaultTimeout);
 		}
@@ -420,7 +421,8 @@ public class MediaController extends FrameLayout {
 	}
 
 	private OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
-		public void onStartTrackingTouch(SeekBar bar) {
+		@Override
+    public void onStartTrackingTouch(SeekBar bar) {
 			mDragging = true;
 			show(3600000);
 			mHandler.removeMessages(SHOW_PROGRESS);
@@ -432,7 +434,8 @@ public class MediaController extends FrameLayout {
 			}
 		}
 
-		public void onProgressChanged(SeekBar bar, int progress, boolean fromuser) {
+		@Override
+    public void onProgressChanged(SeekBar bar, int progress, boolean fromuser) {
 			if (!fromuser)
 				return;
 
@@ -446,7 +449,8 @@ public class MediaController extends FrameLayout {
 				mCurrentTime.setText(time);
 		}
 
-		public void onStopTrackingTouch(SeekBar bar) {
+		@Override
+    public void onStopTrackingTouch(SeekBar bar) {
 			if (!mInstantSeeking)
 				mPlayer.seekTo((mDuration * bar.getProgress()) / 1000);
 			if (mInfoView != null) {

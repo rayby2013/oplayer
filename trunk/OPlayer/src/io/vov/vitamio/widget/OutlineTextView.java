@@ -71,21 +71,24 @@ public class OutlineTextView extends TextView {
 		invalidate();
 	}
 
-	public void setTextSize(float size) {
+	@Override
+  public void setTextSize(float size) {
 		super.setTextSize(size);
 		requestLayout();
 		invalidate();
 		initPaint();
 	}
 
-	public void setTextColor(int color) {
+	@Override
+  public void setTextColor(int color) {
 		super.setTextColor(color);
 		mColor = color;
 		invalidate();
 		initPaint();
 	}
 
-	public void setShadowLayer(float radius, float dx, float dy, int color) {
+	@Override
+  public void setShadowLayer(float radius, float dx, float dy, int color) {
 		super.setShadowLayer(radius, dx, dy, color);
 		mBorderSize = radius;
 		mBorderColor = color;
@@ -94,14 +97,16 @@ public class OutlineTextView extends TextView {
 		initPaint();
 	}
 
-	public void setTypeface(Typeface tf, int style) {
+	@Override
+  public void setTypeface(Typeface tf, int style) {
 		super.setTypeface(tf, style);
 		requestLayout();
 		invalidate();
 		initPaint();
 	}
 
-	public void setTypeface(Typeface tf) {
+	@Override
+  public void setTypeface(Typeface tf) {
 		super.setTypeface(tf);
 		requestLayout();
 		invalidate();

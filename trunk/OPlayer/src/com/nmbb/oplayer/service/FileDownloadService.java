@@ -1,4 +1,4 @@
-package com.nmbb.oplayer.ui.helper;
+package com.nmbb.oplayer.service;
 
 import android.app.Service;
 import android.content.Intent;

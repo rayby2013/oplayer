@@ -209,7 +209,7 @@ public class FragmentOnline extends FragmentBase implements OnItemClickListener 
 									if (Environment.MEDIA_MOUNTED
 											.equals(Environment
 													.getExternalStorageState())) {
-										MainFragmentActivity activity = (MainFragmentActivity) getActivity();
+										MainActivity activity = (MainActivity) getActivity();
 										String savePath = Environment
 												.getExternalStorageDirectory()
 												+ "/";
