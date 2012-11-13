@@ -11,13 +11,14 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.UpdateBuilder;
 import com.nmbb.oplayer.exception.Logger;
 
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class DbHelper<T> {
 
 	/** 新增一条记录 */
 	public int create(T po) {
 		SQLiteHelperOrm db = new SQLiteHelperOrm();
 		try {
-			Dao<T, Long> dao = db.getDao(po.getClass());
+			Dao dao = db.getDao(po.getClass());
 			return dao.create(po);
 		} catch (SQLException e) {
 			Logger.e(e);
@@ -31,7 +32,7 @@ public class DbHelper<T> {
 	public boolean exists(T po, Map<String, Object> where) {
 		SQLiteHelperOrm db = new SQLiteHelperOrm();
 		try {
-			Dao<T, Long> dao = db.getDao(po.getClass());
+			Dao dao = db.getDao(po.getClass());
 			if (dao.queryForFieldValues(where).size() > 0) {
 				return true;
 			}
@@ -47,7 +48,7 @@ public class DbHelper<T> {
 	public int createIfNotExists(T po, Map<String, Object> where) {
 		SQLiteHelperOrm db = new SQLiteHelperOrm();
 		try {
-			Dao<T, Long> dao = db.getDao(po.getClass());
+			Dao dao = db.getDao(po.getClass());
 			if (dao.queryForFieldValues(where).size() < 1) {
 				return dao.create(po);
 			}
@@ -64,7 +65,7 @@ public class DbHelper<T> {
 	public List<T> queryForEq(Class<T> c, String fieldName, Object value) {
 		SQLiteHelperOrm db = new SQLiteHelperOrm();
 		try {
-			Dao<T, Long> dao = db.getDao(c);
+			Dao dao = db.getDao(c);
 			return dao.queryForEq(fieldName, value);
 		} catch (SQLException e) {
 			Logger.e(e);
@@ -79,7 +80,7 @@ public class DbHelper<T> {
 	public int remove(T po) {
 		SQLiteHelperOrm db = new SQLiteHelperOrm();
 		try {
-			Dao<T, Long> dao = db.getDao(po.getClass());
+			Dao dao = db.getDao(po.getClass());
 			return dao.delete(po);
 		} catch (SQLException e) {
 			Logger.e(e);
@@ -102,7 +103,7 @@ public class DbHelper<T> {
 	public int update(Class<T> c, ContentValues values, String columnName, Object value) {
 		SQLiteHelperOrm db = new SQLiteHelperOrm();
 		try {
-			Dao<T, Long> dao = db.getDao(c);
+			Dao dao = db.getDao(c);
 			UpdateBuilder<T, Long> updateBuilder = dao.updateBuilder();
 			updateBuilder.where().eq(columnName, value);
 			for (String key : values.keySet()) {
@@ -122,7 +123,8 @@ public class DbHelper<T> {
 	public int update(T po) {
 		SQLiteHelperOrm db = new SQLiteHelperOrm();
 		try {
-			Dao<T, Long> dao = db.getDao(po.getClass());
+
+			Dao dao = db.getDao(po.getClass());
 			return dao.update(po);
 		} catch (SQLException e) {
 			Logger.e(e);
@@ -137,7 +139,7 @@ public class DbHelper<T> {
 	public List<T> queryForAll(Class<T> c) {
 		SQLiteHelperOrm db = new SQLiteHelperOrm();
 		try {
-			Dao<T, Long> dao = db.getDao(c);
+			Dao dao = db.getDao(c);
 			return dao.queryForAll();
 		} catch (SQLException e) {
 			Logger.e(e);
