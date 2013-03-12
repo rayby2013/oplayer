@@ -5,10 +5,12 @@
 package com.nmbb.oplayer.ui;
 
 import com.nmbb.oplayer.R;
+import com.nmbb.oplayer.exception.Logger;
 import com.nmbb.oplayer.ui.vitamio.LibsChecker;
 
 import io.vov.vitamio.MediaPlayer;
 import io.vov.vitamio.MediaPlayer.OnCompletionListener;
+import io.vov.vitamio.MediaPlayer.OnInfoListener;
 import io.vov.vitamio.widget.MediaController;
 import io.vov.vitamio.widget.VideoView;
 import android.app.Activity;
@@ -32,7 +34,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
-public class VideoPlayerActivity extends Activity implements OnCompletionListener {
+public class VideoPlayerActivity extends Activity implements OnCompletionListener, OnInfoListener {
 
 	private String mPath;
 	private String mTitle;
@@ -51,45 +53,53 @@ public class VideoPlayerActivity extends Activity implements OnCompletionListene
 	private int mLayout = VideoView.VIDEO_LAYOUT_ZOOM;
 	private GestureDetector mGestureDetector;
 	private MediaController mMediaController;
+	private View mLoadingView;
 
 	@Override
-	public void onCreate(Bundle icicle) {
-		super.onCreate(icicle);
+	public void onCreate(Bundle bundle) {
+		super.onCreate(bundle);
 
+		// ~~~ 检测Vitamio是否解压解码包
 		if (!LibsChecker.checkVitamioLibs(this, R.string.init_decoders))
 			return;
 
+		// ~~~ 获取播放地址和标题
 		Intent intent = getIntent();
 		mPath = intent.getStringExtra("path");
 		mTitle = intent.getStringExtra("title");
-		if (TextUtils.isEmpty(mPath))
+		if (TextUtils.isEmpty(mPath)) {
 			mPath = Environment.getExternalStorageDirectory() + "/video/你太猖狂.flv";
-		else if (intent.getData() != null)
+
+		} else if (intent.getData() != null)
 			mPath = intent.getData().toString();
 
+		// ~~~ 绑定控件
 		setContentView(R.layout.videoview);
 		mVideoView = (VideoView) findViewById(R.id.surface_view);
 		mVolumeBrightnessLayout = findViewById(R.id.operation_volume_brightness);
 		mOperationBg = (ImageView) findViewById(R.id.operation_bg);
 		mOperationPercent = (ImageView) findViewById(R.id.operation_percent);
+		mLoadingView = findViewById(R.id.video_loading);
 
+		// ~~~ 绑定事件
+		mVideoView.setOnCompletionListener(this);
+		mVideoView.setOnInfoListener(this);
+
+		// ~~~ 绑定数据
 		mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		mMaxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
 		if (mPath.startsWith("http:"))
 			mVideoView.setVideoURI(Uri.parse(mPath));
 		else
 			mVideoView.setVideoPath(mPath);
-		//
-		mVideoView.setOnCompletionListener(this);
 
-		mMediaController = new MediaController(this);
 		//设置显示名称
+		mMediaController = new MediaController(this);
 		mMediaController.setFileName(mTitle);
 		mVideoView.setMediaController(mMediaController);
 		mVideoView.requestFocus();
 
 		mGestureDetector = new GestureDetector(this, new MyGestureListener());
-
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 	}
 
@@ -250,5 +260,48 @@ public class VideoPlayerActivity extends Activity implements OnCompletionListene
 	@Override
 	public void onCompletion(MediaPlayer player) {
 		finish();
+	}
+
+	private void stopPlayer() {
+		if (mVideoView != null)
+			mVideoView.pause();
+	}
+
+	private void startPlayer() {
+		if (mVideoView != null)
+			mVideoView.start();
+	}
+
+	private boolean isPlaying() {
+		return mVideoView != null && mVideoView.isPlaying();
+	}
+
+	/** 是否需要自动恢复播放，用于自动暂停，恢复播放 */
+	private boolean needResume;
+
+	@Override
+	public boolean onInfo(MediaPlayer arg0, int arg1, int arg2) {
+		switch (arg1) {
+		case MediaPlayer.MEDIA_INFO_BUFFERING_START:
+			//开始缓存，暂停播放
+			if (isPlaying()) {
+				stopPlayer();
+				needResume = true;
+			}
+			mLoadingView.setVisibility(View.VISIBLE);
+			break;
+		case MediaPlayer.MEDIA_INFO_BUFFERING_END:
+			//缓存完成，继续播放
+			if (needResume)
+				startPlayer();
+			mLoadingView.setVisibility(View.GONE);
+			break;
+		case MediaPlayer.MEDIA_INFO_DOWNLOAD_RATE_CHANGED:
+			//显示 下载速度
+			Logger.e("download rate:" + arg2);
+			//mListener.onDownloadRateChanged(arg2);
+			break;
+		}
+		return true;
 	}
 }
